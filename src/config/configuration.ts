@@ -36,9 +36,9 @@ export default () => ({
 
   cache: {
     enabled: process.env.ENABLE_CACHE === 'true',
-    ttlSmsTemplate: 300,
-    ttlEmailTemplate: 600,
-    ttlAnalytics: 60,
+    ttlSmsTemplate: 3600,    // 1 hour
+    ttlEmailTemplate: 7200,  // 2 hours
+    ttlAnalytics: 60,        // 1 minute (keep short — live data)
   },
 
   throttle: {

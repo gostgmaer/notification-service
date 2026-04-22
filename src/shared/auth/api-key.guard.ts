@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
+import { timingSafeEqual } from 'crypto';
 
 export const PUBLIC_KEY = 'isPublic';
 import { SetMetadata } from '@nestjs/common';
@@ -34,7 +35,13 @@ export class ApiKeyGuard implements CanActivate {
       (req.headers['x-api-key'] as string) ||
       (req.headers['authorization'] || '').replace(/^Bearer\s+/i, '');
 
-    if (provided !== apiKey) {
+    // Constant-time comparison to prevent timing-based key enumeration
+    const apiKeyBuf = Buffer.from(apiKey);
+    const providedBuf = Buffer.from(provided);
+    const valid =
+      apiKeyBuf.length === providedBuf.length &&
+      timingSafeEqual(apiKeyBuf, providedBuf);
+    if (!valid) {
       throw new UnauthorizedException('Invalid API key');
     }
     return true;

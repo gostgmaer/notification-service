@@ -1,4 +1,4 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 
@@ -13,6 +13,7 @@ export const REDIS_CLIENT = 'REDIS_CLIENT';
       useFactory: (config: ConfigService): Redis | null => {
         const url = config.get<string>('redis.url');
         if (!url) return null;
+        const redisLogger = new Logger('Redis');
         const client = new Redis(url, {
           password: config.get<string>('redis.password'),
           maxRetriesPerRequest: 3,
@@ -21,7 +22,7 @@ export const REDIS_CLIENT = 'REDIS_CLIENT';
         });
         client.on('error', (err) => {
           // Log but don't crash — Redis is optional
-          console.warn('[Redis] connection error:', err.message);
+          redisLogger.warn(`Connection error: ${err.message}`);
         });
         return client;
       },
