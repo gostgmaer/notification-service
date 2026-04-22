@@ -6,6 +6,9 @@ node_modules/
 dist/
 build/
 
+# Vercel
+.vercel/
+
 # Environment files
 .env
 .env.local
