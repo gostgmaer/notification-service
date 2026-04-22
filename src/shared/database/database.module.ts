@@ -1,0 +1,18 @@
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
+
+@Module({
+  imports: [
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('mongodb.uri'),
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 10000,
+        maxPoolSize: 20,
+      }),
+    }),
+  ],
+})
+export class DatabaseModule {}
