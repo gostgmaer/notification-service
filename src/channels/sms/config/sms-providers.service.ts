@@ -86,7 +86,7 @@ function buildProviderConfig(name: string, env: NodeJS.ProcessEnv): Record<strin
     case 'smscountry':
       return { username: env.SMSCOUNTRY_USERNAME, password: env.SMSCOUNTRY_PASSWORD, senderId: env.SMSCOUNTRY_SENDER_ID };
     case '2factor':
-      return { apiKey: env['2FACTOR_API_KEY'] };
+      return { apiKey: env['TWOFACTOR_API_KEY'] };
     default:
       return {};
   }
