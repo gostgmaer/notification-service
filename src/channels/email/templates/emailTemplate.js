@@ -964,7 +964,7 @@ const PASSWORD_CHANGED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/settings/security',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Review Security Settings',
         color: '#10b981'
       },
@@ -989,7 +989,7 @@ const PASSWORD_RESET_REQUESTED = ({
   applicationName: _appName = applicaionName
 }) => {
   const displayName = name || username || 'User';
-  const ctaUrl = resetLink || resetUrl || _appUrl + '/auth/reset-password/' + resetToken;
+  const ctaUrl = resetLink || resetUrl || _appUrl;
   return {
     subject: `Reset Your Password`,
     html: buildEmailHTML({
@@ -1057,7 +1057,7 @@ const PASSWORD_RESET_COMPLETED = ({
         </table>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/login',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Sign In Now',
         color: '#10b981'
       },
@@ -1326,7 +1326,7 @@ const LOGIN_FAILED = ({
         </table>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/settings/security',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Secure My Account',
         color: '#dc2626'
       },
@@ -1391,7 +1391,7 @@ const NEW_DEVICE_LOGIN = ({
         </table>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/settings/security',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Secure My Account',
         color: '#f59e0b'
       },
@@ -1495,7 +1495,7 @@ const ACCOUNT_UNLOCKED = ({
         </table>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/login',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Sign In Now',
         color: '#10b981'
       },
@@ -1807,7 +1807,7 @@ const SOCIAL_LOGIN_CONNECTED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/settings/security',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Manage Connected Accounts',
         color: '#10b981'
       },
@@ -1864,7 +1864,7 @@ const SOCIAL_LOGIN_DISCONNECTED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/settings/security',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Review Security Settings',
         color: '#f59e0b'
       },
@@ -1959,7 +1959,7 @@ const MFA_DISABLED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/settings/security',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Re-enable 2FA',
         color: '#f59e0b'
       },
@@ -2003,7 +2003,7 @@ const SESSION_EXPIRED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/login',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Log In Again',
         color: '#6b7280'
       },
@@ -3350,18 +3350,18 @@ const welcomeEmailTemplate = (data = {}) => {
 /**
  * emailVerificationTemplate - Modern Email Verification
  */
-const EMAIL_VERIFICATION_SEND = ({ username, token, security }) => {
-  const verifyUrl = `${appUrl || '#'}/verify-email?token=${token}`;
+const EMAIL_VERIFICATION_SEND = ({ username, token, security, appUrl: _appUrl = appUrl, applicationName: _appName = applicaionName }) => {
+  const verifyUrl = `${_appUrl || '#'}/verify-email?token=${token}`;
 
   return {
     subject: `Verify Your Email Address`,
     html: buildEmailHTML({
-      preheader: `Verify your email to continue using ${applicaionName || 'our service'}.`,
+      preheader: `Verify your email to continue using ${_appName || 'our service'}.`,
       title: 'Verify Your Email',
       headerBg: '#2563eb',
       headerText: '📧 Verify Your Email',
-      applicaionName,
-      appUrl,
+      applicationName: _appName,
+      appUrl: _appUrl,
 
       alert: {
         type: 'info',
@@ -4206,7 +4206,7 @@ const logoutAllDevicesTemplate = ({
         </table>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/login',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Sign In Again',
         color: '#2563eb'
       },
@@ -8501,7 +8501,7 @@ const PAYMENT_FAILED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaUrl || (ctaPath ? _appUrl + ctaPath : `${_appUrl}/billing/payment-methods`),
+        url: ctaUrl || (ctaPath ? _appUrl + ctaPath : _appUrl),
         text: 'Update Payment Info',
         color: '#dc2626'
       },
@@ -16824,7 +16824,7 @@ const MARKETPLACE_NEW_REQUEST = ({
   budget,
   customerName,
   requestDisplayId,
-  requestUrl = `${appUrl}/requests`,
+  requestUrl = null,
   appUrl: _appUrl = appUrl,
   applicationName: _appName = applicaionName,
   ctaUrl = null,
@@ -16867,7 +16867,7 @@ const MARKETPLACE_NEW_REQUEST = ({
         </p>
       `,
       ctaButton: {
-        url: requestUrl,
+        url: requestUrl || _appUrl,
         text: 'View Request & Submit Proposal',
         color: '#667eea'
       },
@@ -16951,7 +16951,7 @@ const MARKETPLACE_JOB_ASSIGNED = ({
   price,
   startDate,
   jobDisplayId,
-  jobUrl = `${appUrl}/jobs`,
+  jobUrl = null,
   appUrl: _appUrl = appUrl,
   applicationName: _appName = applicaionName,
   ctaUrl = null,
@@ -16997,7 +16997,7 @@ const MARKETPLACE_JOB_ASSIGNED = ({
         </p>
       `,
       ctaButton: {
-        url: jobUrl,
+        url: jobUrl || _appUrl,
         text: 'View Job Details',
         color: '#10b981'
       },

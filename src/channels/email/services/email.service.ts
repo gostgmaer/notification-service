@@ -1,7 +1,8 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { CacheService } from '../../../shared/cache/cache.service';
+import { TEMPLATE_SCHEMAS } from '../templates/template-schemas';
 
 const RETRYABLE_SMTP_CODES = new Set([421, 450, 451, 452]);
 
@@ -120,6 +121,46 @@ export class EmailService implements OnModuleInit {
     }
   }
 
+  private _validateTemplateData(templateName: string, data: Record<string, unknown>): void {
+    const schema = TEMPLATE_SCHEMAS[templateName];
+    if (!schema) return; // no schema = no enforcement (custom/unknown template)
+    const missing = schema.data.filter(field => data[field] === undefined || data[field] === null || data[field] === '');
+    if (missing.length > 0) {
+      throw new BadRequestException(
+        `Template '${templateName}' is missing required field(s): ${missing.join(', ')}`,
+      );
+    }
+  }
+
+  validateEmailPayload(payload: {
+    templateId?: string;
+    template?: string;
+    data?: Record<string, unknown>;
+    appContext?: Record<string, string>;
+  }): void {
+    const { templateId, template, data = {}, appContext = {} } = payload;
+    const templateName = templateId || template;
+
+    if (!templateName) {
+      throw new BadRequestException('Either template or templateId must be provided');
+    }
+
+    const schema = TEMPLATE_SCHEMAS[templateName];
+    if (schema) {
+      const missingContext: string[] = [];
+      if (!appContext.applicationName) missingContext.push('x-app-name header (applicationName)');
+      if (!appContext.appUrl) missingContext.push('x-app-url header (appUrl)');
+      if (schema.requireCtaPath && !appContext.ctaPath) missingContext.push('x-path header (ctaPath)');
+      if (missingContext.length > 0) {
+        throw new BadRequestException(
+          `Template '${templateName}' requires branding context: ${missingContext.join(', ')}`,
+        );
+      }
+    }
+
+    this._validateTemplateData(templateName, data);
+  }
+
   renderTemplate(templateName: string, data: Record<string, unknown>, appContext: Record<string, string> = {}): { subject: string; html: string; text?: string } {
     const cacheKey = `email:template:${templateName}`;
     let templateFn = this.templateCache.get(templateName);
@@ -137,6 +178,8 @@ export class EmailService implements OnModuleInit {
     if (!templateFn) {
       throw new Error(`Email template not found: ${templateName}`);
     }
+
+    this._validateTemplateData(templateName, data);
 
     const enrichedData = {
       appUrl: appContext.appUrl || process.env.APP_URL || '',
@@ -156,7 +199,7 @@ export class EmailService implements OnModuleInit {
     const { to, from, templateId, template, data = {}, appContext = {}, cc, bcc, attachments } = payload;
     const templateName = templateId || template;
 
-    if (!templateName) throw new Error('Either template or templateId must be provided');
+    this.validateEmailPayload({ templateId, template, data, appContext });
     if (!this.transporter) throw new Error('SMTP not configured — set EMAIL_USER and EMAIL_PASS');
     if (!this.circuitBreaker.isAvailable()) throw new Error('Email service temporarily unavailable (circuit open)');
 

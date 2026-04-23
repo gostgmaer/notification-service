@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Get, Body, Param, Query, Req, HttpCode, HttpStatus, UseGuards, Optional, Inject,
+  Controller, Post, Get, Body, Param, Query, Req, HttpCode, HttpStatus, UseGuards, Optional, Inject, BadRequestException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiBody, ApiHeader } from '@nestjs/swagger';
@@ -32,6 +32,25 @@ export class EmailController {
       appUrl: (req.headers['x-app-url'] as string) || dto.appUrl || '',
       ctaPath: (req.headers['x-path'] as string) || dto.ctaPath || '',
     };
+  }
+
+  private validateRequiredSendHeaders(req: Request, dto: SendEmailDto): void {
+    const tenantId = (req.headers['x-tenant-id'] as string) || req.tenantId;
+    const appName = (req.headers['x-app-name'] as string) || (req.headers['x-app'] as string) || req.appContext?.applicationName;
+    const appUrl = (req.headers['x-app-url'] as string) || dto.appUrl;
+    const ctaPath = (req.headers['x-path'] as string) || dto.ctaPath;
+    const idempotency = this.resolveIdempotencyKey(req, dto);
+
+    const missing: string[] = [];
+    if (!tenantId) missing.push('x-tenant-id');
+    if (!appName) missing.push('x-app-name (or x-app)');
+    if (!appUrl) missing.push('x-app-url');
+    if (!ctaPath) missing.push('x-path');
+    if (!idempotency) missing.push('x-idempotency-key');
+
+    if (missing.length > 0) {
+      throw new BadRequestException(`Missing required header(s) for email dispatch: ${missing.join(', ')}`);
+    }
   }
 
   constructor(
@@ -188,6 +207,7 @@ export class EmailController {
     },
   })
   async sendEmail(@Body() dto: SendEmailDto, @Req() req: Request) {
+    this.validateRequiredSendHeaders(req, dto);
     const requestId = (req as any).requestId || uuidv4();
     const idempotencyKey = this.resolveIdempotencyKey(req, dto);
     const appContext = this.resolveAppContext(req, dto);
@@ -198,6 +218,8 @@ export class EmailController {
       timestamp: new Date().toISOString(),
       appContext,
     };
+
+    this.emailService.validateEmailPayload(emailPayload);
 
     // Idempotency check
     if (emailPayload.idempotencyKey && this.emailLogService.isConnected()) {
@@ -264,10 +286,12 @@ export class EmailController {
     },
   })
   async sendEmailSync(@Body() dto: SendEmailDto, @Req() req: Request) {
+    this.validateRequiredSendHeaders(req, dto);
     const requestId = (req as any).requestId || uuidv4();
     const idempotencyKey = this.resolveIdempotencyKey(req, dto);
     const appContext = this.resolveAppContext(req, dto);
     const emailPayload = { ...dto, idempotencyKey, requestId, appContext };
+    this.emailService.validateEmailPayload(emailPayload);
     const result = await this.emailService.sendEmail(emailPayload);
     await this.emailLogService.updateLog(requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() });
     return { success: true, message: 'Email sent successfully', messageId: result.messageId, requestId };

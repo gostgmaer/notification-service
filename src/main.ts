@@ -42,7 +42,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : (isProduction ? false : '*'),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id', 'x-app-name', 'x-app', 'x-app-url', 'x-path'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id', 'x-app-name', 'x-app', 'x-app-url', 'x-path', 'x-idempotency-key'],
   });
 
   // ── Global pipes ──────────────────────────────────────────────────────────
@@ -98,6 +98,78 @@ async function bootstrap(): Promise<void> {
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
+
+    const defaultHeaderParams = [
+      {
+        name: 'x-tenant-id',
+        in: 'header',
+        required: false,
+        schema: { type: 'string' },
+        description: 'Tenant identifier',
+        example: 'tenant_abc',
+      },
+      {
+        name: 'x-app-name',
+        in: 'header',
+        required: false,
+        schema: { type: 'string' },
+        description: 'Application display name used for branding',
+        example: 'EasyDev',
+      },
+      {
+        name: 'x-app',
+        in: 'header',
+        required: false,
+        schema: { type: 'string' },
+        description: 'Alias of x-app-name',
+        example: 'EasyDev',
+      },
+      {
+        name: 'x-app-url',
+        in: 'header',
+        required: false,
+        schema: { type: 'string' },
+        description: 'Base app URL used in templates',
+        example: 'https://app.example.com',
+      },
+      {
+        name: 'x-path',
+        in: 'header',
+        required: false,
+        schema: { type: 'string' },
+        description: 'CTA path used by templates that need deep-links',
+        example: '/dashboard',
+      },
+      {
+        name: 'x-idempotency-key',
+        in: 'header',
+        required: false,
+        schema: { type: 'string' },
+        description: 'Idempotency key for de-duplication',
+        example: 'req-12345',
+      },
+    ];
+
+    for (const pathKey of Object.keys(document.paths)) {
+      const pathItem = document.paths[pathKey];
+      for (const method of Object.keys(pathItem)) {
+        const operation = (pathItem as any)[method];
+        if (!operation || typeof operation !== 'object') continue;
+        const existingParams = operation.parameters || [];
+        const existingHeaderNames = new Set(
+          existingParams
+            .filter((p: any) => p?.in === 'header' && typeof p?.name === 'string')
+            .map((p: any) => String(p.name).toLowerCase()),
+        );
+
+        const missingDefaults = defaultHeaderParams.filter(
+          (p) => !existingHeaderNames.has(p.name.toLowerCase()),
+        );
+
+        operation.parameters = [...existingParams, ...missingDefaults];
+      }
+    }
+
     SwaggerModule.setup('docs', app, document, {
       swaggerOptions: {
         persistAuthorization: true,
