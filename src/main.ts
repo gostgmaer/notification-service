@@ -42,7 +42,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : (isProduction ? false : '*'),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id', 'x-app', 'x-app-url', 'x-path'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id', 'x-app-name', 'x-app', 'x-app-url', 'x-path'],
   });
 
   // ── Global pipes ──────────────────────────────────────────────────────────

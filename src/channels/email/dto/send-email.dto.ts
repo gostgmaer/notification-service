@@ -4,7 +4,6 @@ import {
   IsArray,
   IsObject,
   IsEmail,
-  ValidateIf,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -194,11 +193,6 @@ export class SendEmailDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
-
-  @ApiPropertyOptional({ example: 'EasyDev', description: 'App name injected into template branding' })
-  @IsOptional()
-  @IsString()
-  applicationName?: string;
 
   @ApiPropertyOptional({ example: 'https://myapp.com', description: 'Base URL for CTA buttons in templates' })
   @IsOptional()

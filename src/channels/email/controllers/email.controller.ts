@@ -2,7 +2,7 @@ import {
   Controller, Post, Get, Body, Param, Query, Req, HttpCode, HttpStatus, UseGuards, Optional, Inject,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiBody, ApiHeader } from '@nestjs/swagger';
 import { v4 as uuidv4 } from 'uuid';
 import { EmailService } from '../services/email.service';
 import { EmailLogService } from '../services/email-log.service';
@@ -18,6 +18,21 @@ export class EmailController {
   private readonly bullEnabled: boolean;
   private readonly kafkaEnabled: boolean;
   private readonly emailQueue: any;
+
+  private resolveIdempotencyKey(req: Request, dto: SendEmailDto): string | undefined {
+    const headerKey =
+      (req.headers['x-idempotency-key'] as string) ||
+      (req.headers['x-idempotencykey'] as string);
+    return headerKey || dto.idempotencyKey;
+  }
+
+  private resolveAppContext(req: Request, dto: SendEmailDto): Record<string, string> {
+    return {
+      applicationName: req.appContext?.applicationName || '',
+      appUrl: (req.headers['x-app-url'] as string) || dto.appUrl || '',
+      ctaPath: (req.headers['x-path'] as string) || dto.ctaPath || '',
+    };
+  }
 
   constructor(
     private readonly emailService: EmailService,
@@ -35,6 +50,18 @@ export class EmailController {
   @ApiOperation({ summary: 'Send email (queued via BullMQ when ENABLE_BULL=true, idempotent)' })
   @ApiResponse({ status: 202, description: 'Email accepted or queued for delivery' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiHeader({
+    name: 'x-app-name',
+    required: false,
+    description: 'Application name used for email branding (preferred over body fields)',
+    example: 'EasyDev',
+  })
+  @ApiHeader({
+    name: 'x-idempotency-key',
+    required: false,
+    description: 'Idempotency key to prevent duplicate sends (header preferred over body field)',
+    example: 'welcome-org_123-john.doe@example.com',
+  })
   @ApiBody({
     type: SendEmailDto,
     examples: {
@@ -48,11 +75,7 @@ export class EmailController {
             orderId: 'ORD-2026-001',
             totalAmount: '₹1,499.00',
             estimatedDelivery: '2026-04-25T00:00:00.000Z',
-            appUrl: 'https://myapp.com',
           },
-          idempotencyKey: 'order-ORD-2026-001-confirm',
-          applicationName: 'EasyDev',
-          appUrl: 'https://myapp.com',
         },
       },
       payment_success: {
@@ -90,11 +113,7 @@ export class EmailController {
           template: 'welcomeEmailTemplate',
           data: {
             username: 'John Doe',
-            appUrl: 'https://myapp.com',
           },
-          applicationName: 'EasyDev',
-          appUrl: 'https://myapp.com',
-          ctaPath: '/dashboard',
         },
       },
       cart_abandoned: {
@@ -112,7 +131,6 @@ export class EmailController {
               { name: 'Phone Case', quantity: 2, price: '₹750.00' },
             ],
             abandonedAt: '2026-04-22T18:00:00.000Z',
-            appUrl: 'https://myapp.com',
           },
         },
       },
@@ -140,7 +158,6 @@ export class EmailController {
             username: 'John Doe',
             subscriptionName: 'Pro Plan',
             startDate: '2026-04-22T00:00:00.000Z',
-            appUrl: 'https://myapp.com',
           },
         },
       },
@@ -153,7 +170,6 @@ export class EmailController {
             inviterName: 'Alice Smith',
             teamName: 'Engineering Team',
             inviteUrl: 'https://myapp.com/invite/abc123',
-            appUrl: 'https://myapp.com',
           },
         },
       },
@@ -173,11 +189,14 @@ export class EmailController {
   })
   async sendEmail(@Body() dto: SendEmailDto, @Req() req: Request) {
     const requestId = (req as any).requestId || uuidv4();
+    const idempotencyKey = this.resolveIdempotencyKey(req, dto);
+    const appContext = this.resolveAppContext(req, dto);
     const emailPayload = {
       ...dto,
+      idempotencyKey,
       requestId,
       timestamp: new Date().toISOString(),
-      appContext: req.appContext || {},
+      appContext,
     };
 
     // Idempotency check
@@ -206,6 +225,18 @@ export class EmailController {
   @Post('send-sync')
   @ApiOperation({ summary: 'Send email synchronously (waits for SMTP response, no queue)' })
   @ApiResponse({ status: 200, description: 'Email sent successfully' })
+  @ApiHeader({
+    name: 'x-app-name',
+    required: false,
+    description: 'Application name used for email branding (preferred over body fields)',
+    example: 'EasyDev',
+  })
+  @ApiHeader({
+    name: 'x-idempotency-key',
+    required: false,
+    description: 'Idempotency key to prevent duplicate sends (header preferred over body field)',
+    example: 'welcome-org_123-john.doe@example.com',
+  })
   @ApiBody({
     type: SendEmailDto,
     examples: {
@@ -234,7 +265,9 @@ export class EmailController {
   })
   async sendEmailSync(@Body() dto: SendEmailDto, @Req() req: Request) {
     const requestId = (req as any).requestId || uuidv4();
-    const emailPayload = { ...dto, requestId, appContext: req.appContext || {} };
+    const idempotencyKey = this.resolveIdempotencyKey(req, dto);
+    const appContext = this.resolveAppContext(req, dto);
+    const emailPayload = { ...dto, idempotencyKey, requestId, appContext };
     const result = await this.emailService.sendEmail(emailPayload);
     await this.emailLogService.updateLog(requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() });
     return { success: true, message: 'Email sent successfully', messageId: result.messageId, requestId };

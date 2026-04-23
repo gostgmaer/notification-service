@@ -28,7 +28,11 @@ export class TenantMiddleware implements NestMiddleware {
 
     // App context (email branding per-request)
     req.appContext = {
-      applicationName: (req.headers['x-app'] as string) || '',
+      applicationName:
+        (req.headers['x-app-name'] as string) ||
+        (req.headers['x-app'] as string) ||
+        process.env.APPLICATION_NAME ||
+        'Notification Service',
       appUrl: (req.headers['x-app-url'] as string) || '',
       ctaPath: (req.headers['x-path'] as string) || '',
     };

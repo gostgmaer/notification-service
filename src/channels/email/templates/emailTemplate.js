@@ -436,7 +436,7 @@ const CONTACT_NOTIFICATION = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/dashboard/contacts',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'View in Dashboard',
         color: '#6366f1'
       },
@@ -491,7 +491,7 @@ const USER_CREATED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/dashboard/users',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Go to Dashboard',
         color: '#10b981'
       },
@@ -584,7 +584,7 @@ const ADMIN_USER_REGISTERED = ({
         </table>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/dashboard/users',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'View in Dashboard',
         color: '#6366f1'
       },
@@ -795,7 +795,7 @@ const USER_REINSTATED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/dashboard',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Go to Dashboard',
         color: '#10b981'
       },
@@ -1113,53 +1113,7 @@ const PASSWORD_EXPIRED = ({
   };
 };
 
-/**
- * EMAIL_VERIFIED Email Template
- * Sent when: Your email address has been verified successfully.
- */
-const EMAIL_VERIFIED = ({
-  name,
-  username,
-  verifiedItem,
-  appUrl: _appUrl = appUrl,
-  applicationName: _appName = applicaionName,
-  ctaPath = null
-}) => {
-  const displayName = name || username || 'User';
-  return {
-    subject: `Email Verified Successfully`,
-    html: buildEmailHTML({
-      preheader: `Your email address has been verified successfully. You now have full access.`,
-      title: 'Email Verified',
-      headerBg: '#10b981',
-      headerText: '✉️ Email Verified!',
-      appUrl: _appUrl,
-      applicationName: _appName,
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${displayName}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Great news — your email address has been verified successfully!
-        </p>
-        
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;padding:20px;background:#d1fae5;border-left:4px solid #10b981;border-radius:4px;">
-          <tr><td style="font-size:14px;color:#065f46;">
-            <strong>✓ Verification Complete</strong><br/>
-            ${verifiedItem ? `Your ${verifiedItem} has been verified successfully.` : 'Your account is now fully active and you have access to all features.'}
-          </td></tr>
-        </table>
-      `,
-      ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/login',
-        text: 'Sign In to Your Account',
-        color: '#10b981'
-      },
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
+
 
 /**
  * PHONE_VERIFIED Email Template
@@ -1239,7 +1193,7 @@ const PROFILE_COMPLETED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/dashboard',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Go to Dashboard',
         color: '#10b981'
       },
@@ -1634,7 +1588,7 @@ const ACCOUNT_RECOVERY_COMPLETED = ({
         </p>
       `,
       ctaButton: {
-        url: ctaPath ? _appUrl + ctaPath : _appUrl + '/dashboard',
+        url: ctaPath ? _appUrl + ctaPath : _appUrl,
         text: 'Go to Dashboard',
         color: '#10b981'
       },
@@ -3456,7 +3410,7 @@ const EMAIL_VERIFICATION_SEND = ({ username, token, security }) => {
 const USER_EMAIL_VERIFIED = ({ username }) => {
   const userNameSafe = username || 'User';
   const appName = applicaionName || 'Our App';
-  const dashboardUrl = `${appUrl || '#'}/dashboard`;
+  const dashboardUrl = ctaPath ? _appUrl + ctaPath : _appUrl;
 
   return {
     subject: `Your Email Has Been Verified ✔`,
@@ -3507,216 +3461,6 @@ const USER_EMAIL_VERIFIED = ({ username }) => {
   };
 };
 
-/**
- * passwordResetRequestTemplate - Reset Your Password
- */
-const passwordResetRequestTemplate = ({
-  resetToken,
-  username,
-  appUrl: _appUrl = appUrl,
-  applicationName: _appName = applicaionName
-}) => {
-  const resetUrl = `${_appUrl}/auth/reset-password/${resetToken}`;
-  return {
-    subject: 'Reset Your Password',
-    html: buildEmailHTML({
-      preheader: 'Click the secure link to reset your password. Expires in 1 hour.',
-      title: 'Reset Your Password',
-      headerBg: '#ef4444',
-      headerText: '🔑 Reset Your Password',
-      appUrl: _appUrl,
-      applicationName: _appName,
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">Hello <strong>${username || 'User'}</strong>,</p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We received a request to reset your password. Click the button below to create a new password.
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          If you didn't request this, you can safely ignore this email &mdash; your password will not change.
-        </p>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;padding:14px 18px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;">
-          <tr><td style="font-size:13px;color:#92400e;">
-            ⚠️ <strong>Security notice:</strong> This link expires in <strong>1 hour</strong>.
-          </td></tr>
-        </table>
-      `,
-      primaryCTA: { url: resetUrl, text: 'Reset Password', color: '#ef4444' },
-      footerNote: "Never share your credentials. We'll never ask for your password."
-    }),
-    attachments: []
-  };
-};
-
-/**
- * passwordResetSuccessTemplate - Password Reset Successful
- */
-const passwordResetSuccessTemplate = ({
-  username,
-  appUrl: _appUrl = appUrl,
-  applicationName: _appName = applicaionName,
-  ctaPath = null
-}) => {
-  return {
-    subject: 'Password Reset Successful',
-    html: buildEmailHTML({
-      preheader: 'Your password has been successfully reset.',
-      title: 'Password Reset Successful',
-      headerBg: '#10b981',
-      headerText: '✅ Password Reset Successful',
-      appUrl: _appUrl,
-      applicationName: _appName,
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">Hello <strong>${username || 'User'}</strong>,</p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Your password has been reset successfully. You can now log in with your new password.
-        </p>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;padding:14px 18px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;">
-          <tr><td style="font-size:13px;color:#92400e;">
-            <strong>If this wasn't you</strong> &mdash; please contact support immediately to secure your account.
-          </td></tr>
-        </table>
-      `,
-      primaryCTA: {
-        url: ctaPath ? _appUrl + ctaPath : `${_appUrl}/login`,
-        text: 'Log In Now',
-        color: '#10b981'
-      },
-      footerNote: "Never share your credentials. We'll never ask for your password."
-    }),
-    attachments: []
-  };
-};
-
-/**
- * passwordChangedSuccessTemplate - Password Changed Successfully
- */
-const passwordChangedSuccessTemplate = ({
-  username,
-  appUrl: _appUrl = appUrl,
-  applicationName: _appName = applicaionName,
-  ctaPath = null
-}) => {
-  return {
-    subject: 'Your Password Was Changed',
-    html: buildEmailHTML({
-      preheader: 'Your account password was changed. If this was you, no action needed.',
-      title: 'Password Changed',
-      headerBg: '#10b981',
-      headerText: '🔒 Password Changed',
-      appUrl: _appUrl,
-      applicationName: _appName,
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">Hello <strong>${username || 'User'}</strong>,</p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Your account password was recently changed. If you made this change, no action is needed.
-        </p>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;padding:14px 18px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;">
-          <tr><td style="font-size:13px;color:#92400e;">
-            <strong>Wasn't you?</strong> Contact support immediately &mdash; someone may have access to your account.
-          </td></tr>
-        </table>
-        <p style="margin:16px 0 0 0;color:#4b5563;">Your account security is our top priority.</p>
-      `,
-      primaryCTA: {
-        url: ctaPath ? _appUrl + ctaPath : `${_appUrl}/support`,
-        text: 'Contact Support',
-        color: '#6b7280'
-      },
-      footerNote: "Never share your credentials. We'll never ask for your password."
-    }),
-    attachments: []
-  };
-};
-
-/**
- * accountLockedTemplate - Account Temporarily Locked
- */
-const accountLockedTemplate = ({
-  username,
-  unlockLink,
-  appUrl: _appUrl = appUrl,
-  applicationName: _appName = applicaionName
-}) => {
-  return {
-    subject: 'Account Temporarily Locked',
-    html: buildEmailHTML({
-      preheader: 'Your account has been temporarily locked due to multiple failed login attempts.',
-      title: 'Account Temporarily Locked',
-      headerBg: '#dc2626',
-      headerText: '🔐 Account Locked',
-      appUrl: _appUrl,
-      applicationName: _appName,
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">Hello <strong>${username || 'User'}</strong>,</p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Your account has been <strong>temporarily locked</strong> due to multiple failed login attempts.
-        </p>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;padding:14px 18px;background:#fee2e2;border-left:4px solid #dc2626;border-radius:6px;">
-          <tr><td style="font-size:14px;color:#7f1d1d;">
-            For your security, access has been restricted. Please wait 30 minutes or use the unlock link below.
-          </td></tr>
-        </table>
-        <p style="margin:16px 0 0 0;color:#4b5563;">If this wasn't you, contact our support team immediately.</p>
-      `,
-      primaryCTA: {
-        url: unlockLink || `${_appUrl}/unlock-account`,
-        text: 'Unlock Account',
-        color: '#dc2626'
-      },
-      footerNote: "Never share your credentials. We'll never ask for your password."
-    }),
-    attachments: []
-  };
-};
-
-/**
- * suspiciousLoginTemplate - Suspicious Login Detected
- */
-const suspiciousLoginTemplate = ({
-  username,
-  location,
-  device,
-  resetLink,
-  appUrl: _appUrl = appUrl,
-  applicationName: _appName = applicaionName
-}) => {
-  return {
-    subject: '⚠️ Suspicious Login Detected on Your Account',
-    html: buildEmailHTML({
-      preheader: 'We detected a suspicious login attempt. If this was not you, act now.',
-      title: 'Suspicious Login Detected',
-      headerBg: '#dc2626',
-      headerText: '⚠️ Suspicious Login Detected',
-      appUrl: _appUrl,
-      applicationName: _appName,
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">Hello <strong>${username || 'User'}</strong>,</p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We detected a login attempt on your account from an unusual location or device.
-        </p>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;padding:20px;background:#f3f4f6;border-radius:8px;">
-          <tr><td style="font-size:14px;line-height:22px;">
-            <strong style="color:#111827;">Login Details:</strong><br/>
-            ${location ? `<span style="color:#6b7280;">Location:</span> <strong style="color:#111827;">${location}</strong><br/>` : ''}
-            ${device ? `<span style="color:#6b7280;">Device:</span>   <strong style="color:#111827;">${device}</strong><br/>` : ''}
-          </td></tr>
-        </table>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:12px 0;padding:14px 18px;background:#fee2e2;border-left:4px solid #dc2626;border-radius:6px;">
-          <tr><td style="font-size:13px;color:#7f1d1d;">
-            <strong>If this wasn't you</strong> &mdash; secure your account immediately by resetting your password.
-          </td></tr>
-        </table>
-      `,
-      primaryCTA: {
-        url: resetLink || `${_appUrl}/auth/reset-password`,
-        text: 'Secure My Account',
-        color: '#dc2626'
-      },
-      footerNote: "Never share your credentials. We'll never ask for your password."
-    }),
-    attachments: []
-  };
-};
 
 /**
  * accountDeletedTemplate - Account Deleted
@@ -3784,185 +3528,8 @@ const subscriptionUpdatedTemplate = ({ username, plan }) => {
   };
 };
 
-/**
- * paymentFailedTemplate - Payment Failed
- */
-const paymentFailedTemplate = ({ username, amount, retryLink }) => {
-  return {
-    subject: `Payment Failed`,
-    html: buildEmailHTML({
-      preheader: `Payment Failed`,
-      title: 'Payment Failed',
-      headerBg: '#ef4444',
-      headerText: '💳 Payment Failed',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We have an update regarding your recent payment.
-        </p>
 
-        <!-- Add dynamic content here based on parameters -->
 
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * paymentSuccessTemplate - Payment Successful
- */
-const paymentSuccessTemplate = ({ username, amount, invoiceLink }) => {
-  return {
-    subject: `Payment Successful`,
-    html: buildEmailHTML({
-      preheader: `Payment Successful`,
-      title: 'Payment Successful',
-      headerBg: '#10b981',
-      headerText: '✅ Payment Successful',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We have an update regarding your recent payment.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * orderConfirmationTemplate - Order Confirmation
- */
-const orderConfirmationTemplate = ({
-  username,
-  orderId,
-  items,
-  total,
-  appUrl: _appUrl = appUrl,
-  applicationName: _appName = applicaionName,
-  ctaUrl = null,
-  ctaPath = null
-}) => {
-  return {
-    subject: `Order Confirmation`,
-    html: buildEmailHTML({
-      appUrl: _appUrl,
-      applicationName: _appName,
-      preheader: `Order Confirmation`,
-      title: 'Order Confirmation',
-      headerBg: '#3b82f6',
-      headerText: '✉️ Order Confirmation',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Please verify your information by clicking the button below.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: {
-        url: ctaUrl || (ctaPath ? _appUrl + ctaPath : `${_appUrl}/action`),
-        text: 'Take Action',
-        color: '#3b82f6'
-      },
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * orderShippedTemplate - Your Order Has Shipped
- */
-const orderShippedTemplate = ({ username, orderId, trackingLink }) => {
-  return {
-    subject: `Your Order Has Shipped`,
-    html: buildEmailHTML({
-      preheader: `Your Order Has Shipped`,
-      title: 'Your Order Has Shipped',
-      headerBg: '#8b5cf6',
-      headerText: '📦 Your Order Has Shipped',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Your order has been updated. See details below.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * orderDeliveredTemplate - Order Delivered
- */
-const orderDeliveredTemplate = ({ username, orderId }) => {
-  return {
-    subject: `Order Delivered`,
-    html: buildEmailHTML({
-      preheader: `Order Delivered`,
-      title: 'Order Delivered',
-      headerBg: '#8b5cf6',
-      headerText: '📦 Order Delivered',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Your order has been updated. See details below.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * passwordExpiryReminderTemplate - Password Expiry Reminder
@@ -4097,172 +3664,8 @@ const newsletterTemplate = ({ title, content, ctaLink }) => {
   };
 };
 
-/**
- * accountDeactivationWarningTemplate - Account Deactivation Warning
- */
-const accountDeactivationWarningTemplate = ({ username, reactivateLink }) => {
-  return {
-    subject: `Account Deactivation Warning`,
-    html: buildEmailHTML({
-      preheader: `Account Deactivation Warning`,
-      title: 'Account Deactivation Warning',
-      headerBg: '#dc2626',
-      headerText: '⚠️ Account Deactivation Warning',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We detected unusual activity that requires your attention.
-        </p>
 
-        <!-- Add dynamic content here based on parameters -->
 
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * accountReactivatedTemplate - Account Reactivated
- */
-const accountReactivatedTemplate = ({ username }) => {
-  return {
-    subject: `Account Reactivated`,
-    html: buildEmailHTML({
-      preheader: `Account Reactivated`,
-      title: 'Account Reactivated',
-      headerBg: '#2563eb',
-      headerText: '📧 Account Reactivated',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-// --- 20 templates completed ---
-
-/**
- * newDeviceLoginTemplate - New Device Login Detected
- */
-const newDeviceLoginTemplate = ({ username, location, device }) => {
-  return {
-    subject: `New Device Login Detected`,
-    html: buildEmailHTML({
-      preheader: `New Device Login Detected`,
-      title: 'New Device Login Detected',
-      headerBg: '#2563eb',
-      headerText: '📧 New Device Login Detected',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * subscriptionRenewalReminderTemplate - Subscription Renewal Reminder
- */
-const subscriptionRenewalReminderTemplate = ({ username, plan, renewalDate }) => {
-  return {
-    subject: `Subscription Renewal Reminder`,
-    html: buildEmailHTML({
-      preheader: `Subscription Renewal Reminder`,
-      title: 'Subscription Renewal Reminder',
-      headerBg: '#8b5cf6',
-      headerText: '📋 Subscription Renewal Reminder',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Your subscription status has been updated.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * subscriptionCancelledTemplate - Subscription Cancelled
- */
-const subscriptionCancelledTemplate = ({ username, plan }) => {
-  return {
-    subject: `Subscription Cancelled`,
-    html: buildEmailHTML({
-      preheader: `Subscription Cancelled`,
-      title: 'Subscription Cancelled',
-      headerBg: '#8b5cf6',
-      headerText: '📋 Subscription Cancelled',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Your subscription status has been updated.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * giftCardReceivedTemplate - Gift Card Received
@@ -4297,85 +3700,8 @@ const giftCardReceivedTemplate = ({ username, sender, amount, redeemCode }) => {
   };
 };
 
-/**
- * reviewRequestTemplate - Review Request
- */
-const reviewRequestTemplate = ({
-  username,
-  product,
-  reviewLink,
-  appUrl: _appUrl = appUrl,
-  applicationName: _appName = applicaionName,
-  ctaUrl = null,
-  ctaPath = null
-}) => {
-  return {
-    subject: `Review Request`,
-    html: buildEmailHTML({
-      appUrl: _appUrl,
-      applicationName: _appName,
-      preheader: `Review Request`,
-      title: 'Review Request',
-      headerBg: '#2563eb',
-      headerText: '📧 Review Request',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
 
-        <!-- Add dynamic content here based on parameters -->
 
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: {
-        url: ctaUrl || (ctaPath ? _appUrl + ctaPath : `${_appUrl}/action`),
-        text: 'Take Action',
-        color: '#2563eb'
-      },
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * cartAbandonmentTemplate - Items Left in Cart
- */
-const cartAbandonmentTemplate = ({ username, items, checkoutLink }) => {
-  return {
-    subject: `Items Left in Cart`,
-    html: buildEmailHTML({
-      preheader: `Items Left in Cart`,
-      title: 'Items Left in Cart',
-      headerBg: '#f59e0b',
-      headerText: '🛒 Items Left in Cart',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * loyaltyPointsEarnedTemplate - Loyalty Points Earned
@@ -4443,71 +3769,6 @@ const dataExportRequestTemplate = ({ username, requestDate }) => {
   };
 };
 
-/**
- * policyUpdateTemplate - Policy Update
- */
-const policyUpdateTemplate = ({ username, policyLink }) => {
-  return {
-    subject: `Policy Update`,
-    html: buildEmailHTML({
-      preheader: `Policy Update`,
-      title: 'Policy Update',
-      headerBg: '#2563eb',
-      headerText: '📧 Policy Update',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * trialExpiringTemplate - Trial Expiring Soon
- */
-const trialExpiringTemplate = ({ username, expiryDate, upgradeLink }) => {
-  return {
-    subject: `Trial Expiring Soon`,
-    html: buildEmailHTML({
-      preheader: `Trial Expiring Soon`,
-      title: 'Trial Expiring Soon',
-      headerBg: '#2563eb',
-      headerText: '📧 Trial Expiring Soon',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * trialExpiredTemplate - Trial Expired
@@ -4542,104 +3803,9 @@ const trialExpiredTemplate = ({ username, upgradeLink }) => {
   };
 };
 
-/**
- * invoiceGeneratedTemplate - Invoice Generated
- */
-const invoiceGeneratedTemplate = ({ username, invoiceNumber, amount, invoiceLink }) => {
-  return {
-    subject: `Invoice Generated`,
-    html: buildEmailHTML({
-      preheader: `Invoice Generated`,
-      title: 'Invoice Generated',
-      headerBg: '#10b981',
-      headerText: '💳 Invoice Generated',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
 
-        <!-- Add dynamic content here based on parameters -->
 
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
-/**
- * paymentRefundedTemplate - Payment Refunded
- */
-const paymentRefundedTemplate = ({ username, amount, refundDate }) => {
-  return {
-    subject: `Payment Refunded`,
-    html: buildEmailHTML({
-      preheader: `Payment Refunded`,
-      title: 'Payment Refunded',
-      headerBg: '#10b981',
-      headerText: '💳 Payment Refunded',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We have an update regarding your recent payment.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * maintenanceNoticeTemplate - Scheduled Maintenance Notice
- */
-const maintenanceNoticeTemplate = ({ username, startTime, endTime }) => {
-  return {
-    subject: `Scheduled Maintenance Notice`,
-    html: buildEmailHTML({
-      preheader: `Scheduled Maintenance Notice`,
-      title: 'Scheduled Maintenance Notice',
-      headerBg: '#f59e0b',
-      headerText: '🔧 Scheduled Maintenance Notice',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * newFeatureAnnouncementTemplate - New Feature Announcement
@@ -4674,105 +3840,8 @@ const newFeatureAnnouncementTemplate = ({ username, featureName, featureLink }) 
   };
 };
 
-/**
- * birthdayGreetingTemplate - Happy Birthday!
- */
-const birthdayGreetingTemplate = ({ username, discountCode }) => {
-  return {
-    subject: `Happy Birthday!`,
-    html: buildEmailHTML({
-      preheader: `Happy Birthday!`,
-      title: 'Happy Birthday!',
-      headerBg: '#10b981',
-      headerText: '🎉 Happy Birthday!',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
 
-        <!-- Add dynamic content here based on parameters -->
 
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * twoFactorSetupTemplate - Set Up Two-Factor Authentication
- */
-const twoFactorSetupTemplate = ({ name, username, qrCodeUrl, setupLink, secret }) => {
-  const displayName = name || username || 'User';
-  return {
-    subject: `Set Up Two-Factor Authentication`,
-    html: buildEmailHTML({
-      preheader: `Scan the QR code to activate two-factor authentication on your account.`,
-      title: 'Set Up Two-Factor Authentication',
-      headerBg: '#7c3aed',
-      headerText: '🔐 Enable Two-Factor Authentication',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${displayName}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          You've started setting up two-factor authentication (2FA). Follow the steps below to complete setup.
-        </p>
-
-        <p style="margin:0 0 12px 0;color:#111827;font-weight:600;">Step 1: Scan the QR Code</p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Open your authenticator app (Google Authenticator, Authy, etc.) and scan the QR code below:
-        </p>
-
-        ${
-          qrCodeUrl
-            ? `
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:16px 0;">
-          <tr><td align="center" style="padding:20px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">
-            <img src="${qrCodeUrl}" alt="2FA QR Code" width="180" height="180" style="display:block;margin:0 auto;" />
-          </td></tr>
-        </table>
-        `
-            : ''
-        }
-
-        ${
-          secret
-            ? `
-        <p style="margin:16px 0 8px 0;color:#111827;font-weight:600;">Step 2: Or enter the code manually</p>
-        <p style="margin:0 0 8px 0;color:#4b5563;">If you can't scan the QR code, enter this secret key in your authenticator app:</p>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:8px 0;">
-          <tr><td align="center" style="padding:16px;background:#f3f4f6;border-radius:8px;">
-            <code style="font-size:18px;font-weight:700;letter-spacing:4px;color:#7c3aed;font-family:'Courier New',monospace;">${secret}</code>
-          </td></tr>
-        </table>
-        `
-            : ''
-        }
-
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin:24px 0;padding:16px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:4px;">
-          <tr><td style="font-size:14px;color:#92400e;">
-            <strong>💾 Save your backup codes</strong><br/>
-            After setup, save your backup codes in a safe place. You'll need them if you lose access to your authenticator.
-          </td></tr>
-        </table>
-      `,
-      ctaButton: setupLink
-        ? { url: setupLink, text: 'Complete 2FA Setup', color: '#7c3aed' }
-        : null,
-      footerNote: 'Never share your 2FA secret or backup codes with anyone.'
-    }),
-    attachments: []
-  };
-};
 const twoFactorCompletedTemplate = ({ username }) => {
   return {
     subject: `Two-Factor Authentication Enabled`,
@@ -4808,38 +3877,7 @@ const twoFactorCompletedTemplate = ({ username }) => {
     attachments: []
   };
 };
-/**
- * twoFactorCodeTemplate - Your Two-Factor Authentication Code
- */
-const twoFactorCodeTemplate = ({ username, code }) => {
-  return {
-    subject: `Your Two-Factor Authentication Code`,
-    html: buildEmailHTML({
-      preheader: `Your Two-Factor Authentication Code`,
-      title: 'Your Two-Factor Authentication Code',
-      headerBg: '#7c3aed',
-      headerText: '🔐 Your Two-Factor Authentication Code',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Please use the verification code below to continue.
-        </p>
 
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * backupCodesTemplate - Your Backup Login Codes
@@ -4892,40 +3930,6 @@ const backupCodesTemplate = ({ name, username, codes = [] }) => {
   };
 };
 
-// --- 40 templates completed ---
-
-/**
- * newDeviceApprovalTemplate - New Device Login Approval
- */
-const newDeviceApprovalTemplate = ({ username, device, approveLink, denyLink }) => {
-  return {
-    subject: `New Device Login Approval`,
-    html: buildEmailHTML({
-      preheader: `New Device Login Approval`,
-      title: 'New Device Login Approval',
-      headerBg: '#2563eb',
-      headerText: '📧 New Device Login Approval',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * emailChangedTemplate - Email Address Changed
@@ -4993,71 +3997,7 @@ const loginAlertTemplate = ({ username, device, location, time }) => {
   };
 };
 
-/**
- * sessionExpiredTemplate - Session Expired
- */
-const sessionExpiredTemplate = ({ username }) => {
-  return {
-    subject: `Session Expired`,
-    html: buildEmailHTML({
-      preheader: `Session Expired`,
-      title: 'Session Expired',
-      headerBg: '#2563eb',
-      headerText: '📧 Session Expired',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
 
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * accountRecoveryTemplate - Account Recovery Request
- */
-const accountRecoveryTemplate = ({ username, recoveryLink }) => {
-  return {
-    subject: `Account Recovery Request`,
-    html: buildEmailHTML({
-      preheader: `Account Recovery Request`,
-      title: 'Account Recovery Request',
-      headerBg: '#2563eb',
-      headerText: '📧 Account Recovery Request',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * accountReactivationTemplate - Reactivate Your Account
@@ -5224,38 +4164,6 @@ const failedLoginAttemptsTemplate = ({ username, attempts, lockLink }) => {
   };
 };
 
-/**
- * accountVerifiedTemplate - Account Verified
- */
-const accountVerifiedTemplate = ({ username }) => {
-  return {
-    subject: `Account Verified`,
-    html: buildEmailHTML({
-      preheader: `Account Verified`,
-      title: 'Account Verified',
-      headerBg: '#2563eb',
-      headerText: '📧 Account Verified',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 /**
  * logoutAllDevicesTemplate - Logged Out From All Devices
@@ -5491,104 +4399,7 @@ const phoneNumberChangeConfirmationTemplate = ({
   };
 };
 
-/**
- * dataExportReadyTemplate - Your Data Export is Ready
- */
-const dataExportReadyTemplate = ({ username, downloadLink }) => {
-  return {
-    subject: `Your Data Export is Ready`,
-    html: buildEmailHTML({
-      preheader: `Your Data Export is Ready`,
-      title: 'Your Data Export is Ready',
-      headerBg: '#2563eb',
-      headerText: '📧 Your Data Export is Ready',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
 
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * privacyPolicyUpdateTemplate - Privacy Policy Updated
- */
-const privacyPolicyUpdateTemplate = ({ username, policyLink }) => {
-  return {
-    subject: `Privacy Policy Updated`,
-    html: buildEmailHTML({
-      preheader: `Privacy Policy Updated`,
-      title: 'Privacy Policy Updated',
-      headerBg: '#2563eb',
-      headerText: '📧 Privacy Policy Updated',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
-
-/**
- * termsOfServiceUpdateTemplate - Terms of Service Updated
- */
-const termsOfServiceUpdateTemplate = ({ username, termsLink }) => {
-  return {
-    subject: `Terms of Service Updated`,
-    html: buildEmailHTML({
-      preheader: `Terms of Service Updated`,
-      title: 'Terms of Service Updated',
-      headerBg: '#2563eb',
-      headerText: '📧 Terms of Service Updated',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: null
-    }),
-    attachments: []
-  };
-};
 
 // --- 60 templates completed ---
 
@@ -5691,38 +4502,6 @@ const accountVerificationReminderTemplate = ({ username }) => {
   };
 };
 
-/**
- * accountSecurityAuditCompletedTemplate - Account Security Audit Completed
- */
-const accountSecurityAuditCompletedTemplate = ({ username }) => {
-  return {
-    subject: `Account Security Audit Completed`,
-    html: buildEmailHTML({
-      preheader: `Account Security Audit Completed`,
-      title: 'Account Security Audit Completed',
-      headerBg: '#10b981',
-      headerText: '✅ Account Security Audit Completed',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hello <strong>${username || 'User'}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          We wanted to inform you about an important update.
-        </p>
-
-        <!-- Add dynamic content here based on parameters -->
-
-        <p style="margin:24px 0 0 0;color:#4b5563;">
-          Thank you,<br/>
-          <strong style="color:#111827;">The ${applicaionName || 'Team'}</strong>
-        </p>
-      `,
-      ctaButton: null,
-      footerNote: 'Never share this information with anyone.'
-    }),
-    attachments: []
-  };
-};
 
 /**
  * backupEmailAddedRemovedTemplate - Backup Email Address Updated
@@ -16627,12 +15406,12 @@ const INQUIRY_NOTIFICATION = ({
         }
       `,
       ctaButton: {
-        url: ctaUrl || `${_appUrl}/dashboard/inquiries/${inquiryId}`,
+        url: ctaUrl || _appUrl,
         text: 'View Project Lead →',
         color: '#059669'
       },
       secondaryCta: {
-        url: ctaUrl || (ctaPath ? _appUrl + ctaPath : `${_appUrl}/dashboard/inquiries`),
+        url: ctaUrl || (ctaPath ? _appUrl + ctaPath : _appUrl),
         text: 'All Inquiries'
       },
       footerNote: `Project Lead #${inquiryId.slice(-6)} • High priority - respond ASAP`
@@ -16787,12 +15566,12 @@ const INQUIRY_CONFIRMATION = ({
         </p>
       `,
       ctaButton: {
-        url: ctaUrl || `${_appUrl}/inquiries/${inquiryId}`,
+        url: ctaUrl || _appUrl,
         text: 'Track Your Project',
         color: '#059669'
       },
       secondaryCta: {
-        url: ctaUrl || (ctaPath ? _appUrl + ctaPath : `${_appUrl}/services`),
+        url: ctaUrl || (ctaPath ? _appUrl + ctaPath : _appUrl),
         text: 'View Our Services'
       },
       footerNote: `Project Ref: ${inquiryId.slice(-6)} • ${companyName} Team`
@@ -17876,37 +16655,7 @@ const LEAD_LOST_NOTIFICATION = ({
   attachments: []
 });
 
-/**
- * emailVerificationTemplate — Resend verify-email link.
- * Variables: { name, verifyLink, expiryHours }
- */
-const emailVerificationTemplate = ({ name, username, verifyLink, expiryHours = 24 }) => {
-  const displayName = name || username || 'User';
-  return {
-    subject: 'Verify Your Email Address',
-    html: buildEmailHTML({
-      preheader: `Hi ${displayName}, one quick step — please verify your email address.`,
-      title: 'Verify Your Email',
-      headerBg: '#2563eb',
-      headerText: '📧 Verify Your Email',
-      bodyHTML: `
-        <p style="margin:0 0 16px 0;">
-          Hi <strong>${displayName}</strong>,
-        </p>
-        <p style="margin:0 0 16px 0;color:#4b5563;">
-          Please verify your email address to keep your account active and secure.
-        </p>
-        <p style="margin:0 0 24px 0;color:#6b7280;font-size:13px;">
-          This link expires in <strong>${expiryHours} hour${expiryHours !== 1 ? 's' : ''}</strong>.
-          If you didn't request this, you can safely ignore this email.
-        </p>
-      `,
-      ctaButton: { url: verifyLink, text: 'Verify Email Address', color: '#2563eb' },
-      footerNote: `If the button doesn't work, copy and paste this link into your browser:<br/><span style="word-break:break-all">${verifyLink}</span>`
-    }),
-    attachments: []
-  };
-};
+
 
 // =====================================================================================
 // 🏪 MARKETPLACE-SPECIFIC EMAIL TEMPLATES
@@ -17920,13 +16669,13 @@ const emailVerificationTemplate = ({ name, username, verifyLink, expiryHours = 2
 const MARKETPLACE_WELCOME = ({
   name,
   email,
-  dashboardUrl = `${appUrl}/dashboard`,
+  dashboardUrl = null,
   appUrl: _appUrl = appUrl,
   applicationName: _appName = applicaionName,
   ctaUrl = null,
   ctaPath = null
 }) => {
-  const isProvider = name && name.toLowerCase().includes('provider');
+  const resolvedDashboardUrl = dashboardUrl || (ctaPath ? _appUrl + ctaPath : _appUrl);
 
   return {
     subject: 'Welcome to Local Service Marketplace! 🎉',
@@ -18141,7 +16890,7 @@ const MARKETPLACE_PROPOSAL_RECEIVED = ({
   estimatedDuration,
   proposalDisplayId,
   requestDisplayId,
-  proposalUrl = `${appUrl}/dashboard`,
+  proposalUrl = null,
   appUrl: _appUrl = appUrl,
   applicationName: _appName = applicaionName,
   ctaUrl = null,
@@ -18269,7 +17018,7 @@ const MARKETPLACE_PAYMENT_RECEIVED = ({
   jobTitle,
   customerName,
   paymentDisplayId,
-  dashboardUrl = `${appUrl}/dashboard`,
+  dashboardUrl = null,
   appUrl: _appUrl = appUrl,
   applicationName: _appName = applicaionName,
   ctaUrl = null,
@@ -18325,7 +17074,7 @@ const MARKETPLACE_PAYMENT_RECEIVED = ({
 const MARKETPLACE_PROVIDER_APPROVED = ({
   businessName,
   email,
-  dashboardUrl = `${appUrl}/provider/dashboard`,
+  dashboardUrl = null,
   appUrl: _appUrl = appUrl,
   applicationName: _appName = applicaionName,
   ctaUrl = null,
