@@ -8,6 +8,11 @@ const emailLogSchema = new mongoose.Schema(
       index: true,
       unique: true
     },
+    tenantId: {
+      type: String,
+      index: true,
+      sparse: true
+    },
     to: {
       type: [String],
       required: true
@@ -79,6 +84,9 @@ const emailLogSchema = new mongoose.Schema(
 
 emailLogSchema.index({ createdAt: -1 });
 emailLogSchema.index({ status: 1, createdAt: -1 });
+emailLogSchema.index({ tenantId: 1, createdAt: -1 });
+emailLogSchema.index({ tenantId: 1, status: 1, createdAt: -1 });
+emailLogSchema.index({ tenantId: 1, idempotencyKey: 1 }, { sparse: true });
 
 const EmailLog = mongoose.model('EmailLog', emailLogSchema);
 

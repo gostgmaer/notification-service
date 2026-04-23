@@ -30,6 +30,7 @@ const smsTemplateSchema = new mongoose.Schema({
 // Unique indexes for code and name per tenant
 smsTemplateSchema.index({ code: 1, tenantId: 1 }, { unique: true });
 smsTemplateSchema.index({ name: 1, tenantId: 1 }, { unique: true });
+smsTemplateSchema.index({ tenantId: 1, isDeleted: 1, createdAt: -1 });
 
 const SmsTemplate = mongoose.model('SmsTemplate', smsTemplateSchema);
 module.exports = SmsTemplate;

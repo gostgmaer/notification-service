@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 
 const smsCampaignSchema = new mongoose.Schema({
+  campaignId: { type: String, required: true, unique: true, index: true },
   name: { type: String, required: true },
   templateId: { type: mongoose.Schema.Types.ObjectId, ref: 'SmsTemplate' },
   message: String,
@@ -32,6 +33,8 @@ const smsCampaignSchema = new mongoose.Schema({
   timestamps: true,
   versionKey: false,
 });
+
+smsCampaignSchema.index({ tenantId: 1, createdAt: -1 });
 
 const SmsCampaign = mongoose.model('SmsCampaign', smsCampaignSchema);
 module.exports = SmsCampaign;

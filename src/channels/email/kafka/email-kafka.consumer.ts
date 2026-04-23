@@ -19,12 +19,12 @@ export class EmailKafkaConsumer {
     try {
       const result = await this.emailService.sendEmail(payload);
       if (payload.requestId) {
-        await this.emailLogService.updateLog(payload.requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() });
+        await this.emailLogService.updateLog(payload.requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() }, payload.tenantId ?? null);
       }
     } catch (err: any) {
       this.logger.error(`Kafka email send failed: ${err.message}`);
       if (payload.requestId) {
-        await this.emailLogService.updateLog(payload.requestId, { status: 'failed', error: err.message, failedAt: new Date() });
+        await this.emailLogService.updateLog(payload.requestId, { status: 'failed', error: err.message, failedAt: new Date() }, payload.tenantId ?? null);
       }
       throw err;
     }

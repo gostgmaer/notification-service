@@ -26,14 +26,14 @@ export class EmailProcessor extends WorkerHost {
           status: 'sent',
           messageId: result.messageId,
           sentAt: new Date(),
-        });
+        }, payload.tenantId ?? null);
         return result;
       } catch (err: any) {
         await this.emailLogService.updateLog(payload.requestId, {
           status: this.emailService.isRetryableSmtpError(err) ? 'retrying' : 'failed',
           error: err.message,
           failedAt: new Date(),
-        });
+        }, payload.tenantId ?? null);
         throw err; // rethrow so BullMQ applies retry/failure logic
       }
     }

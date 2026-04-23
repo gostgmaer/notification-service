@@ -216,6 +216,7 @@ export class EmailController {
       idempotencyKey,
       requestId,
       timestamp: new Date().toISOString(),
+      tenantId: req.tenantId,
       appContext,
     };
 
@@ -223,7 +224,7 @@ export class EmailController {
 
     // Idempotency check
     if (emailPayload.idempotencyKey && this.emailLogService.isConnected()) {
-      const existing = await this.emailLogService.getLog(`idempotency:${emailPayload.idempotencyKey}`);
+      const existing = await this.emailLogService.getLogByIdempotencyKey(emailPayload.idempotencyKey, req.tenantId);
       if (existing) {
         return { success: true, message: 'Email already processed', idempotencyKey: emailPayload.idempotencyKey, requestId };
       }
@@ -239,7 +240,7 @@ export class EmailController {
 
     // Direct send
     const result = await this.emailService.sendEmail(emailPayload);
-    await this.emailLogService.updateLog(requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() });
+    await this.emailLogService.updateLog(requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() }, req.tenantId);
 
     return { success: true, message: 'Email sent successfully', messageId: result.messageId, requestId };
   }
@@ -290,10 +291,10 @@ export class EmailController {
     const requestId = (req as any).requestId || uuidv4();
     const idempotencyKey = this.resolveIdempotencyKey(req, dto);
     const appContext = this.resolveAppContext(req, dto);
-    const emailPayload = { ...dto, idempotencyKey, requestId, appContext };
+    const emailPayload = { ...dto, idempotencyKey, requestId, tenantId: req.tenantId, appContext };
     this.emailService.validateEmailPayload(emailPayload);
     const result = await this.emailService.sendEmail(emailPayload);
-    await this.emailLogService.updateLog(requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() });
+    await this.emailLogService.updateLog(requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() }, req.tenantId);
     return { success: true, message: 'Email sent successfully', messageId: result.messageId, requestId };
   }
 
@@ -304,7 +305,7 @@ export class EmailController {
       circuitBreaker: this.emailService.getCircuitBreakerStatus(),
       smtpConfigured: this.emailService.isSmtpConfigured(),
       database: { connected: this.emailLogService.isConnected() },
-      ...(this.emailLogService.isConnected() ? { dbStats: await this.emailLogService.getStats() } : {}),
+      ...(this.emailLogService.isConnected() ? { dbStats: await this.emailLogService.getStats(req.tenantId) } : {}),
     };
   }
 
@@ -322,14 +323,14 @@ export class EmailController {
       skip: parseInt(query.skip) || 0,
       sort: query.sort ? (() => { try { return JSON.parse(query.sort); } catch { return { createdAt: -1 }; } })() : { createdAt: -1 },
     };
-    const result = await this.emailLogService.getLogs(filters, options);
+    const result = await this.emailLogService.getLogs(filters, options, req.tenantId);
     return { success: true, ...result };
   }
 
   @Get('logs/:requestId')
   @ApiOperation({ summary: 'Get a single email log by requestId' })
-  async getEmailLog(@Param('requestId') requestId: string) {
-    const log = await this.emailLogService.getLog(requestId);
+  async getEmailLog(@Param('requestId') requestId: string, @Req() req: Request) {
+    const log = await this.emailLogService.getLog(requestId, req.tenantId);
     return { success: true, data: log };
   }
 

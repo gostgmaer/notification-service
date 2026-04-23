@@ -12,6 +12,10 @@ export class EmailLogService {
   private readonly logger = new Logger(EmailLogService.name);
   private connected = false;
 
+  private buildTenantFilter(tenantId?: string | null): Record<string, unknown> {
+    return tenantId ? { tenantId } : {};
+  }
+
   setConnected(val: boolean): void {
     this.connected = val;
   }
@@ -31,19 +35,23 @@ export class EmailLogService {
     }
   }
 
-  async updateLog(requestId: string, update: any): Promise<void> {
+  async updateLog(requestId: string, update: any, tenantId?: string | null): Promise<void> {
     if (!this.connected) return;
     try {
       const Model = getEmailLog();
-      await Model.findOneAndUpdate({ requestId }, { $set: update });
+      await Model.findOneAndUpdate({ requestId, ...this.buildTenantFilter(tenantId) }, { $set: update });
     } catch (err: any) {
       this.logger.warn(`Failed to update email log: ${err.message}`);
     }
   }
 
-  async getLogs(filters: any, options: { limit?: number; skip?: number; sort?: any } = {}): Promise<any> {
+  async getLogs(
+    filters: any,
+    options: { limit?: number; skip?: number; sort?: any } = {},
+    tenantId?: string | null,
+  ): Promise<any> {
     const Model = getEmailLog();
-    const query: any = {};
+    const query: any = { ...this.buildTenantFilter(tenantId) };
     if (filters.status) query.status = filters.status;
     if (filters.startDate || filters.endDate) {
       query.createdAt = {};
@@ -61,14 +69,20 @@ export class EmailLogService {
     return { data: docs, total };
   }
 
-  async getLog(requestId: string): Promise<any> {
+  async getLog(requestId: string, tenantId?: string | null): Promise<any> {
     const Model = getEmailLog();
-    return Model.findOne({ requestId }).lean();
+    return Model.findOne({ requestId, ...this.buildTenantFilter(tenantId) }).lean();
   }
 
-  async getStats(): Promise<any> {
+  async getLogByIdempotencyKey(idempotencyKey: string, tenantId?: string | null): Promise<any> {
+    const Model = getEmailLog();
+    return Model.findOne({ idempotencyKey, ...this.buildTenantFilter(tenantId) }).lean();
+  }
+
+  async getStats(tenantId?: string | null): Promise<any> {
     const Model = getEmailLog();
     const stats = await Model.aggregate([
+      ...(tenantId ? [{ $match: { tenantId } }] : []),
       { $group: { _id: '$status', count: { $sum: 1 } } },
     ]);
     return stats.reduce((acc: any, s: any) => { acc[s._id] = s.count; return acc; }, {});

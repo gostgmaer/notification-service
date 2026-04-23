@@ -175,3 +175,5 @@ export class SmsLog {
 export const SmsLogSchema = SchemaFactory.createForClass(SmsLog);
 SmsLogSchema.index({ tenantId: 1, status: 1, createdAt: -1 });
 SmsLogSchema.index({ tenantId: 1, provider: 1, createdAt: -1 });
+SmsLogSchema.index({ tenantId: 1, createdAt: -1 });
+SmsLogSchema.index({ tenantId: 1, referenceId: 1 }, { sparse: true });
