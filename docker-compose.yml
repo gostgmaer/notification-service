@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    profiles: [full]
     ports:
       - '4000:4000'
     environment:
@@ -29,7 +30,8 @@ services:
       - notification-net
 
   mongo:
-    image: mongo:7
+    image: bitnami/mongodb:latest
+    profiles: [infra, full]
     ports:
       - '27017:27017'
     volumes:
@@ -45,6 +47,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    profiles: [infra, full]
     ports:
       - '6379:6379'
     volumes:
@@ -61,7 +64,7 @@ services:
   # ── Kafka (enable with: docker compose --profile kafka up) ──────────────────
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
-    profiles: [kafka]
+    profiles: [kafka, full]
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     networks:
@@ -69,7 +72,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.6.1
-    profiles: [kafka]
+    profiles: [kafka, full]
     ports:
       - '9092:9092'
     environment:
@@ -87,7 +90,7 @@ services:
   # ── MailHog (enable with: docker compose --profile mailhog up) ──────────────
   mailhog:
     image: mailhog/mailhog:latest
-    profiles: [mailhog]
+    profiles: [mailhog, full]
     ports:
       - '1025:1025'
       - '8025:8025'
