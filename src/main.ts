@@ -30,8 +30,7 @@ async function bootstrap(): Promise<void> {
   }
 
   const app = await NestFactory.create(AppModule, {
-    bufferLogs: true,
-    logger: ['error', 'warn', 'log', 'debug'],
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
   // ── Security ──────────────────────────────────────────────────────────────
