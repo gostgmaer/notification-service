@@ -89,6 +89,9 @@ importers:
       kafkajs:
         specifier: ^2.2.4
         version: 2.2.4
+      libphonenumber-js:
+        specifier: ^1.12.41
+        version: 1.12.41
       mongoose:
         specifier: ^8.5.1
         version: 8.23.0
