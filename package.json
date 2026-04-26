@@ -29,7 +29,7 @@
     "@nestjs/microservices": "^10.3.10",
     "@nestjs/mongoose": "^10.0.10",
     "@nestjs/platform-express": "^10.3.10",
-    "@nestjs/swagger": "^11.4.1",
+    "@nestjs/swagger": "^7.4.2",
     "@nestjs/terminus": "^10.2.3",
     "@nestjs/throttler": "^6.2.1",
     "aws-sdk": "^2.1691.0",
