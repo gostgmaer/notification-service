@@ -17181,6 +17181,265 @@ const MARKETPLACE_PROVIDER_REJECTED = ({
   attachments: []
 });
 
+/**
+ * ADMIN_CREATED_USER Email Template
+ * Sent when: An admin creates a new user account on their behalf.
+ * The user receives their login credentials including a temporary password.
+ * Variables: { username, email, temporaryPassword, loginUrl, createdBy, appUrl, applicationName }
+ */
+const ADMIN_CREATED_USER = ({
+  username,
+  email,
+  temporaryPassword,
+  loginUrl,
+  createdBy,
+  appUrl: _appUrl = appUrl,
+  applicationName: _appName = applicaionName
+}) => {
+  const displayName = username || email || 'User';
+  const ctaUrl = loginUrl || _appUrl + '/login';
+
+  return {
+    subject: `Your ${_appName} account has been created`,
+    html: buildEmailHTML({
+      preheader: `Your account has been created by an administrator. Use the temporary password inside to log in.`,
+      title: 'Your Account Has Been Created',
+      headerBg: '#2563eb',
+      headerText: '👤 Account Created by Administrator',
+      appUrl: _appUrl,
+      applicationName: _appName,
+      alert: {
+        type: 'warn',
+        text: 'You have been assigned a temporary password. You must change it after your first login.'
+      },
+      bodyHTML: `
+        <p style="margin:0 0 16px 0;">
+          Hello <strong>${displayName}</strong>,
+        </p>
+        <p style="margin:0 0 16px 0;color:#4b5563;">
+          An administrator${createdBy ? ` (<strong>${createdBy}</strong>)` : ''} has created an account for you on <strong>${_appName}</strong>. Your login credentials are listed below.
+        </p>
+
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+          style="margin:24px 0;padding:20px;background:#f3f4f6;border-radius:8px;">
+          <tr>
+            <td style="font-size:14px;line-height:26px;">
+              <strong style="color:#111827;">Your Login Details:</strong><br/>
+              <span style="color:#6b7280;">Email / Username:</span>
+              <strong style="color:#111827;">${email}</strong><br/>
+              <span style="color:#6b7280;">Temporary Password:</span>
+              <strong style="color:#1d4ed8;font-family:monospace;font-size:16px;letter-spacing:1px;">${temporaryPassword}</strong>
+            </td>
+          </tr>
+        </table>
+
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+          style="margin:0 0 24px 0;padding:16px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:4px;">
+          <tr>
+            <td style="font-size:13px;color:#92400e;line-height:20px;">
+              <strong>Important — Change your password immediately</strong><br/>
+              This is a temporary password and may expire. Please log in and update it right away to secure your account.
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:0;color:#4b5563;font-size:14px;">
+          Click the button below to log in. If you have any questions, contact our support team.
+        </p>
+      `,
+      primaryCTA: {
+        url: ctaUrl,
+        text: 'Log In & Change Password',
+        color: '#2563eb'
+      },
+      footerNote: "Never share your credentials with anyone. We will never ask for your password."
+    }),
+    attachments: []
+  };
+};
+
+/**
+ * PRODUCT_ACCESS_GRANTED Email Template
+ * Sent when: A user is granted access to a product (web app) after account creation.
+ * Supports monthly and yearly subscription plans.
+ * Variables:
+ *   { username, email, productName, productDescription, productUrl, accessStartDate,
+ *     accessEndDate, planType ('monthly'|'yearly'|'lifetime'), planLabel,
+ *     features, supportUrl, createdBy, appUrl, applicationName }
+ */
+const PRODUCT_ACCESS_GRANTED = ({
+  username,
+  email,
+  productName,
+  productDescription,
+  productUrl,
+  accessStartDate,
+  accessEndDate,
+  planType = 'monthly', // 'monthly' | 'yearly' | 'lifetime'
+  planLabel,
+  features = [],
+  supportUrl,
+  createdBy,
+  appUrl: _appUrl = appUrl,
+  applicationName: _appName = applicaionName
+}) => {
+  const displayName = username || email || 'User';
+  const ctaUrl = productUrl || _appUrl;
+  const _supportUrl = supportUrl || _appUrl + '/support';
+
+  // Plan badge config
+  const planConfig = {
+    monthly: { label: planLabel || 'Monthly Plan', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af' },
+    yearly:  { label: planLabel || 'Annual Plan',  color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', text: '#5b21b6' },
+    lifetime:{ label: planLabel || 'Lifetime Access', color: '#059669', bg: '#ecfdf5', border: '#a7f3d0', text: '#065f46' }
+  };
+  const plan = planConfig[planType] || planConfig.monthly;
+
+  // Format dates
+  const fmtDate = d => {
+    if (!d) return null;
+    try { return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); }
+    catch { return String(d); }
+  };
+  const startFormatted = fmtDate(accessStartDate) || fmtDate(new Date());
+  const endFormatted = fmtDate(accessEndDate);
+
+  // Feature list rows
+  const featureRows = features.length
+    ? features
+        .map(
+          f => `
+          <tr>
+            <td style="padding:6px 0;font-size:14px;color:#374151;line-height:20px;">
+              <span style="display:inline-block;width:20px;color:${plan.color};font-weight:700;">&#10003;</span>
+              ${f}
+            </td>
+          </tr>`
+        )
+        .join('')
+    : '';
+
+  return {
+    subject: `You now have access to ${productName || _appName}`,
+    html: buildEmailHTML({
+      preheader: `Your access to ${productName || _appName} is now active. Click inside to get started.`,
+      title: `Access Granted — ${productName || _appName}`,
+      headerBg: plan.color,
+      headerText: `🚀 Your Access to ${productName || _appName} is Ready`,
+      appUrl: _appUrl,
+      applicationName: _appName,
+      bodyHTML: `
+        <p style="margin:0 0 16px 0;">
+          Hello <strong>${displayName}</strong>,
+        </p>
+        <p style="margin:0 0 20px 0;color:#4b5563;line-height:24px;">
+          ${createdBy ? `<strong>${createdBy}</strong> has granted you` : "You've been granted"} access to
+          <strong>${productName || _appName}</strong>${productDescription ? ` — ${productDescription}` : ''}.
+          Your subscription is now <strong style="color:${plan.color};">active</strong> and ready to use.
+        </p>
+
+        <!-- Plan Badge -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+          style="margin:0 0 24px 0;">
+          <tr>
+            <td>
+              <span style="display:inline-block;padding:6px 16px;background:${plan.bg};border:1px solid ${plan.border};color:${plan.text};border-radius:20px;font-size:13px;font-weight:700;letter-spacing:0.4px;">
+                ${plan.label}
+              </span>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Subscription Details -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+          style="margin:0 0 24px 0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+          <tr>
+            <td style="padding:16px 20px;background:#f9fafb;border-bottom:1px solid #e5e7eb;">
+              <strong style="color:#111827;font-size:14px;">Subscription Details</strong>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 20px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                style="font-size:14px;line-height:28px;">
+                <tr>
+                  <td style="color:#6b7280;width:140px;">Product</td>
+                  <td style="color:#111827;font-weight:600;">${productName || _appName}</td>
+                </tr>
+                <tr>
+                  <td style="color:#6b7280;">Plan</td>
+                  <td>
+                    <span style="color:${plan.text};font-weight:700;background:${plan.bg};padding:2px 10px;border-radius:12px;font-size:13px;">${plan.label}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color:#6b7280;">Access From</td>
+                  <td style="color:#111827;font-weight:600;">${startFormatted}</td>
+                </tr>
+                ${endFormatted ? `
+                <tr>
+                  <td style="color:#6b7280;">Access Until</td>
+                  <td style="color:#111827;font-weight:600;">${endFormatted}</td>
+                </tr>` : ''}
+                <tr>
+                  <td style="color:#6b7280;">Account Email</td>
+                  <td style="color:#111827;">${email}</td>
+                </tr>
+                ${createdBy ? `
+                <tr>
+                  <td style="color:#6b7280;">Granted By</td>
+                  <td style="color:#111827;">${createdBy}</td>
+                </tr>` : ''}
+              </table>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Features -->
+        ${featureRows ? `
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+          style="margin:0 0 24px 0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+          <tr>
+            <td style="padding:16px 20px;background:#f9fafb;border-bottom:1px solid #e5e7eb;">
+              <strong style="color:#111827;font-size:14px;">What's Included</strong>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 20px 16px 20px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                ${featureRows}
+              </table>
+            </td>
+          </tr>
+        </table>` : ''}
+
+        <!-- Getting Started -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+          style="margin:0 0 8px 0;padding:16px 20px;background:#f0f9ff;border-left:4px solid ${plan.color};border-radius:4px;">
+          <tr>
+            <td style="font-size:13px;color:#0369a1;line-height:22px;">
+              <strong>Getting Started</strong><br/>
+              Use the email address <strong>${email}</strong> to log in. If this is your first time, check your inbox for your account credentials email.
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:20px 0 0 0;color:#6b7280;font-size:13px;">
+          Need help? Our support team is available at
+          <a href="${_supportUrl}" style="color:${plan.color};text-decoration:none;font-weight:600;">${_supportUrl}</a>.
+        </p>
+      `,
+      primaryCTA: {
+        url: ctaUrl,
+        text: `Access ${productName || _appName} Now`,
+        color: plan.color
+      },
+      footerNote: `You're receiving this email because access was granted to your account (${email}).`
+    }),
+    attachments: []
+  };
+};
+
 module.exports = {
   // Marketplace-specific templates
   MARKETPLACE_WELCOME,
@@ -17548,5 +17807,8 @@ module.exports = {
   LEAD_CONTRACT_SENT,
   LEAD_CONTRACT_SIGNED,
   LEAD_WON_NOTIFICATION,
-  LEAD_LOST_NOTIFICATION
+  LEAD_LOST_NOTIFICATION,
+
+  ADMIN_CREATED_USER,
+  PRODUCT_ACCESS_GRANTED
 };
