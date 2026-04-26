@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
+      # 1. Checkout
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -20,16 +20,16 @@ jobs:
         with:
           node-version: 20
 
-      # 3. Install dependencies
+      # 3. Install deps
       - name: Install dependencies
         run: npm install
 
-      # 4. Build project
+      # 4. Build
       - name: Build project
         run: npm run build
 
-      # 5. Copy files to server
-      - name: Upload to server
+      # 5. Upload to server
+      - name: Upload files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -38,7 +38,7 @@ jobs:
           source: "dist,package.json,package-lock.json"
           target: "/home/opc/notification-service"
 
-      # 6. Run commands on server
+      # 6. Deploy (UPDATED PART)
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -48,10 +48,13 @@ jobs:
           script: |
             cd /home/opc/notification-service
 
-            # install only production deps (low RAM safe)
+            # install production deps (safe for low RAM)
             npm install --omit=dev --prefer-offline
 
-            # restart app with PM2
-            pm2 restart notification || pm2 start dist/main.js --name notification --max-memory-restart 150M
+            # start or restart with env update
+            pm2 describe notification > /dev/null \
+              && pm2 restart notification --update-env \
+              || pm2 start dist/main.js --name notification --max-memory-restart 150M
 
+            # save process list
             pm2 save
