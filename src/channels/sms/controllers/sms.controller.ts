@@ -7,6 +7,7 @@ import { SmsService } from '../services/sms.service';
 import { SmsBulkService } from '../services/sms-bulk.service';
 import { SendSmsDto } from '../dto/send-sms.dto';
 import { SendBulkSmsDto } from '../dto/bulk-sms.dto';
+import { SendOtpDto, VerifyOtpDto } from '../dto/otp.dto';
 import { ApiKeyGuard } from '../../../shared/auth/api-key.guard';
 import { ConfigService } from '@nestjs/config';
 
@@ -77,6 +78,28 @@ export class SmsController {
   @ApiResponse({ status: 200, description: 'PII purged from log' })
   async gdprPurge(@Param('messageId') messageId: string, @Req() req: Request) {
     const result = await this.smsService.purgeMessage(messageId, req.tenantId);
+    return { success: true, data: result };
+  }
+
+  // ─── OTP endpoints ───────────────────────────────────────────────────────────
+
+  @Post('otp/send')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOperation({ summary: 'Generate and send an OTP via SMS' })
+  @ApiResponse({ status: 202, description: 'OTP sent successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async sendOtp(@Body() dto: SendOtpDto, @Req() req: Request) {
+    const result = await this.smsService.sendOtp(dto, req.tenantId);
+    return { success: true, data: result };
+  }
+
+  @Post('otp/verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify an OTP previously sent via SMS' })
+  @ApiResponse({ status: 200, description: 'OTP verification result' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async verifyOtp(@Body() dto: VerifyOtpDto, @Req() req: Request) {
+    const result = await this.smsService.verifyOtp({ to: dto.to, otp: dto.otp }, req.tenantId);
     return { success: true, data: result };
   }
 }
