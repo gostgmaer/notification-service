@@ -205,11 +205,31 @@ export class EmailService implements OnModuleInit {
 
     const { subject, html, text } = this.renderTemplate(templateName, data, appContext);
     const cfg = this.config.get<any>('email');
+    const configuredFromAddress = (cfg.from || '').trim();
+
+    if (!configuredFromAddress) {
+      throw new Error('Sender not configured — set EMAIL_FROM');
+    }
+
+    if (
+      from &&
+      typeof from === 'string' &&
+      from.trim() &&
+      from.trim().toLowerCase() !== configuredFromAddress.toLowerCase()
+    ) {
+      this.logger.warn(
+        `Ignoring overridden 'from' (${from}) and using configured EMAIL_FROM (${configuredFromAddress})`,
+      );
+    }
+
+    const fromHeader = configuredFromAddress.includes('<')
+      ? configuredFromAddress
+      : `${cfg.fromName} <${configuredFromAddress}>`;
 
     const result = await this.circuitBreaker.execute(async () => {
       return this.transporter!.sendMail({
-        from: from || (cfg.from.includes('<') ? cfg.from : `${cfg.fromName} <${cfg.from}>`),
-        // cfg.from = EMAIL_FROM env var (falls back to EMAIL_USER)
+        from: fromHeader,
+        // Sender is always derived from EMAIL_FROM (or DEFAULT_FROM_EMAIL fallback).
         // cfg.fromName = DEFAULT_FROM_NAME env var (falls back to 'Notifications')
         to,
         subject,

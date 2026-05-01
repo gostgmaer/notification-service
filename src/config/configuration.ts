@@ -60,7 +60,7 @@ export default () => ({
     service: process.env.EMAIL_SERVICE || '',
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || '',
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || '',
+    from: process.env.EMAIL_FROM || process.env.DEFAULT_FROM_EMAIL || '',
     fromName: process.env.DEFAULT_FROM_NAME || process.env.EMAIL_FROM_NAME || 'Notifications',
     maxConnections: parseInt(process.env.EMAIL_MAX_CONNECTIONS, 10) || 5,
     maxMessages: parseInt(process.env.EMAIL_MAX_MESSAGES, 10) || 100,
