@@ -1,0 +1,14 @@
+node_modules
+dist
+coverage
+.git
+.github
+.vscode
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.env
+.env.*
+Dockerfile*
+README.md
+*.md

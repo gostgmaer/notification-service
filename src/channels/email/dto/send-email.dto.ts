@@ -53,6 +53,14 @@ export class SendEmailDto {
   @IsEmail()
   from?: string;
 
+  @ApiPropertyOptional({
+    example: 'Local Service Provider',
+    description: 'Sender display name. If omitted, DEFAULT_FROM_NAME/EMAIL_FROM_NAME is used.',
+  })
+  @IsOptional()
+  @IsString()
+  fromName?: string;
+
   @ApiPropertyOptional({ example: ['manager@easydev.in'], type: [String] })
   @IsOptional()
   @IsArray()

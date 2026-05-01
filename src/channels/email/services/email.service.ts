@@ -196,7 +196,7 @@ export class EmailService implements OnModuleInit {
   }
 
   async sendEmail(payload: any): Promise<{ success: boolean; messageId?: string; accepted?: string[]; rejected?: string[] }> {
-    const { to, from, templateId, template, data = {}, appContext = {}, cc, bcc, attachments } = payload;
+    const { to, from, fromName, templateId, template, data = {}, appContext = {}, cc, bcc, attachments } = payload;
     const templateName = templateId || template;
 
     this.validateEmailPayload({ templateId, template, data, appContext });
@@ -206,31 +206,28 @@ export class EmailService implements OnModuleInit {
     const { subject, html, text } = this.renderTemplate(templateName, data, appContext);
     const cfg = this.config.get<any>('email');
     const configuredFromAddress = (cfg.from || '').trim();
+    const requestedFromAddress = typeof from === 'string' ? from.trim() : '';
+    const requestedFromName = typeof fromName === 'string' ? fromName.trim() : '';
+    const effectiveFromAddress = requestedFromAddress || configuredFromAddress;
+    const effectiveFromName = requestedFromName || (cfg.fromName || 'Notifications');
 
-    if (!configuredFromAddress) {
+    if (!effectiveFromAddress) {
       throw new Error('Sender not configured — set EMAIL_FROM');
     }
 
-    if (
-      from &&
-      typeof from === 'string' &&
-      from.trim() &&
-      from.trim().toLowerCase() !== configuredFromAddress.toLowerCase()
-    ) {
-      this.logger.warn(
-        `Ignoring overridden 'from' (${from}) and using configured EMAIL_FROM (${configuredFromAddress})`,
+    if (requestedFromAddress && configuredFromAddress && requestedFromAddress.toLowerCase() !== configuredFromAddress.toLowerCase()) {
+      this.logger.log(
+        `Using request-level sender '${requestedFromAddress}' instead of configured EMAIL_FROM '${configuredFromAddress}'`,
       );
     }
 
-    const fromHeader = configuredFromAddress.includes('<')
-      ? configuredFromAddress
-      : `${cfg.fromName} <${configuredFromAddress}>`;
+    const fromHeader = effectiveFromAddress.includes('<')
+      ? effectiveFromAddress
+      : `${effectiveFromName} <${effectiveFromAddress}>`;
 
     const result = await this.circuitBreaker.execute(async () => {
       return this.transporter!.sendMail({
         from: fromHeader,
-        // Sender is always derived from EMAIL_FROM (or DEFAULT_FROM_EMAIL fallback).
-        // cfg.fromName = DEFAULT_FROM_NAME env var (falls back to 'Notifications')
         to,
         subject,
         html,

@@ -41,7 +41,19 @@ async function bootstrap(): Promise<void> {
   app.enableCors({
     origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : (isProduction ? false : '*'),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-tenant-id', 'x-app-name', 'x-app', 'x-app-url', 'x-path', 'x-idempotency-key'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'x-api-key',
+      'x-tenant-id',
+      'x-app-name',
+      'x-app',
+      'x-app-url',
+      'x-path',
+      'x-idempotency-key',
+      'x-from-email',
+      'x-from-name',
+    ],
   });
 
   // ── Global pipes ──────────────────────────────────────────────────────────
@@ -146,6 +158,22 @@ async function bootstrap(): Promise<void> {
         schema: { type: 'string' },
         description: 'Idempotency key for de-duplication',
         example: 'req-12345',
+      },
+      {
+        name: 'x-from-email',
+        in: 'header',
+        required: false,
+        schema: { type: 'string' },
+        description: 'Optional sender email for this request',
+        example: 'no-reply@easydev.in',
+      },
+      {
+        name: 'x-from-name',
+        in: 'header',
+        required: false,
+        schema: { type: 'string' },
+        description: 'Optional sender display name for this request',
+        example: 'EasyDev',
       },
     ];
 

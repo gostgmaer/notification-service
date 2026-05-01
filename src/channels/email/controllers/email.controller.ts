@@ -34,6 +34,21 @@ export class EmailController {
     };
   }
 
+  private resolveSenderContext(req: Request, dto: SendEmailDto): { from?: string; fromName?: string } {
+    const fromHeader = (req.headers['x-from-email'] as string) || dto.from || '';
+    const fromNameHeader = (req.headers['x-from-name'] as string) || dto.fromName || '';
+
+    const sender: { from?: string; fromName?: string } = {};
+    if (typeof fromHeader === 'string' && fromHeader.trim()) {
+      sender.from = fromHeader.trim();
+    }
+    if (typeof fromNameHeader === 'string' && fromNameHeader.trim()) {
+      sender.fromName = fromNameHeader.trim();
+    }
+
+    return sender;
+  }
+
   private validateRequiredSendHeaders(req: Request, dto: SendEmailDto): void {
     const tenantId = (req.headers['x-tenant-id'] as string) || req.tenantId;
     const appName = (req.headers['x-app-name'] as string) || (req.headers['x-app'] as string) || req.appContext?.applicationName;
@@ -80,6 +95,18 @@ export class EmailController {
     required: false,
     description: 'Idempotency key to prevent duplicate sends (header preferred over body field)',
     example: 'welcome-org_123-john.doe@example.com',
+  })
+  @ApiHeader({
+    name: 'x-from-email',
+    required: false,
+    description: 'Optional sender email. Falls back to EMAIL_FROM/DEFAULT_FROM_EMAIL when omitted.',
+    example: 'lsp@easydev.in',
+  })
+  @ApiHeader({
+    name: 'x-from-name',
+    required: false,
+    description: 'Optional sender display name. Falls back to DEFAULT_FROM_NAME/EMAIL_FROM_NAME when omitted.',
+    example: 'Local Service Provider',
   })
   @ApiBody({
     type: SendEmailDto,
@@ -211,8 +238,10 @@ export class EmailController {
     const requestId = (req as any).requestId || uuidv4();
     const idempotencyKey = this.resolveIdempotencyKey(req, dto);
     const appContext = this.resolveAppContext(req, dto);
+    const senderContext = this.resolveSenderContext(req, dto);
     const emailPayload = {
       ...dto,
+      ...senderContext,
       idempotencyKey,
       requestId,
       timestamp: new Date().toISOString(),
@@ -260,6 +289,18 @@ export class EmailController {
     description: 'Idempotency key to prevent duplicate sends (header preferred over body field)',
     example: 'welcome-org_123-john.doe@example.com',
   })
+  @ApiHeader({
+    name: 'x-from-email',
+    required: false,
+    description: 'Optional sender email. Falls back to EMAIL_FROM/DEFAULT_FROM_EMAIL when omitted.',
+    example: 'lsp@easydev.in',
+  })
+  @ApiHeader({
+    name: 'x-from-name',
+    required: false,
+    description: 'Optional sender display name. Falls back to DEFAULT_FROM_NAME/EMAIL_FROM_NAME when omitted.',
+    example: 'Local Service Provider',
+  })
   @ApiBody({
     type: SendEmailDto,
     examples: {
@@ -291,7 +332,8 @@ export class EmailController {
     const requestId = (req as any).requestId || uuidv4();
     const idempotencyKey = this.resolveIdempotencyKey(req, dto);
     const appContext = this.resolveAppContext(req, dto);
-    const emailPayload = { ...dto, idempotencyKey, requestId, tenantId: req.tenantId, appContext };
+    const senderContext = this.resolveSenderContext(req, dto);
+    const emailPayload = { ...dto, ...senderContext, idempotencyKey, requestId, tenantId: req.tenantId, appContext };
     this.emailService.validateEmailPayload(emailPayload);
     const result = await this.emailService.sendEmail(emailPayload);
     await this.emailLogService.updateLog(requestId, { status: 'sent', messageId: result.messageId, sentAt: new Date() }, req.tenantId);

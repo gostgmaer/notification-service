@@ -60,8 +60,14 @@ export default () => ({
     service: process.env.EMAIL_SERVICE || '',
     user: process.env.EMAIL_USER || '',
     pass: process.env.EMAIL_PASS || '',
-    from: process.env.EMAIL_FROM || process.env.DEFAULT_FROM_EMAIL || '',
-    fromName: process.env.DEFAULT_FROM_NAME || process.env.EMAIL_FROM_NAME || 'Notifications',
+    from:
+      process.env.EMAIL_FROM ||
+      process.env.DEFAULT_FROM_EMAIL ||
+      'noreply@easydev.in',
+    fromName:
+      process.env.DEFAULT_FROM_NAME ||
+      process.env.EMAIL_FROM_NAME ||
+      'Easydev',
     maxConnections: parseInt(process.env.EMAIL_MAX_CONNECTIONS, 10) || 5,
     maxMessages: parseInt(process.env.EMAIL_MAX_MESSAGES, 10) || 100,
     rateDelta: parseInt(process.env.EMAIL_RATE_DELTA, 10) || 1000,
