@@ -27,7 +27,7 @@ export const TEMPLATE_SCHEMAS: Record<string, TemplateSchema> = {
 
   // ── User Lifecycle ────────────────────────────────────────────────────────
   USER_CREATED:                                { data: ['userId', 'username', 'email', 'timestamp'] },
-  USER_WELCOME:                                { data: ['userId', 'username', 'email', 'verifyLink', 'timestamp'] },
+  USER_WELCOME:                                { data: ['username', 'email'] },
   ADMIN_USER_REGISTERED:                       { data: ['userId', 'username', 'email', 'registeredAt'] },
   USER_UPDATED:                                { data: ['userId', 'username', 'email', 'timestamp'] },
   USER_DELETED:                                { data: ['userId', 'username', 'email', 'timestamp'] },
@@ -130,8 +130,12 @@ export const TEMPLATE_SCHEMAS: Record<string, TemplateSchema> = {
   TEAM_INVITE:                                 { data: ['inviteeEmail', 'invitedBy', 'teamName'] },
 
   // ── Newsletter / Welcome ──────────────────────────────────────────────────
+  NEWSLETTER_SUBSCRIBE_CONFIRMATION:           { data: ['name', 'email', 'confirmationUrl', 'companyName'] },
   NEWSLETTER_WELCOME:                          { data: ['email', 'companyName'] },
+  NEWSLETTER_RESUBSCRIBE:                      { data: ['name', 'email', 'companyName'] },
+  NEWSLETTER_FAREWELL:                         { data: ['name', 'email', 'companyName'] },
   newsletterTemplate:                          { data: ['title', 'content'] },
+  ADMIN_CREATED_USER:                          { data: ['username', 'email', 'temporaryPassword', 'loginUrl'] },
 
   // ── Subscription / Payment (camelCase) ────────────────────────────────────
   subscriptionUpdatedTemplate:                 { data: ['username', 'plan'] },
@@ -411,6 +415,9 @@ export const TEMPLATE_SCHEMAS: Record<string, TemplateSchema> = {
   LEAD_CONTRACT_SIGNED:                        { data: ['firstName', 'leadNumber', 'projectName', 'contractSignedAt', 'agentName'] },
   LEAD_WON_NOTIFICATION:                       { data: ['leadNumber', 'firstName', 'lastName', 'email', 'projectName'] },
   LEAD_LOST_NOTIFICATION:                      { data: ['leadNumber', 'firstName', 'lastName', 'email', 'lostReason'] },
+
+  // ── IAM Bootstrap ─────────────────────────────────────────────────────────
+  IAM_BOOTSTRAP_CREDENTIALS:                   { data: ['message'] },
 
   // ── Marketplace (UPPERCASE) ───────────────────────────────────────────────
   MARKETPLACE_WELCOME:                         { data: ['name'] },
