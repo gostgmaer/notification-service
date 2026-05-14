@@ -5,7 +5,11 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm config set fetch-retries 10 \
+ && pnpm config set fetch-retry-maxtimeout 300000 \
+ && pnpm config set fetch-retry-mintimeout 10000 \
+ && pnpm config set network-concurrency 1 \
+ && pnpm install --frozen-lockfile
 
 COPY . .
 RUN pnpm run build
@@ -18,7 +22,11 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm config set fetch-retries 10 \
+ && pnpm config set fetch-retry-maxtimeout 300000 \
+ && pnpm config set fetch-retry-mintimeout 10000 \
+ && pnpm config set network-concurrency 1 \
+ && pnpm install --prod --frozen-lockfile
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/channels/sms/providers ./src/channels/sms/providers

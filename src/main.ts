@@ -85,7 +85,7 @@ async function bootstrap(): Promise<void> {
     logger.log('Kafka microservice started');
   }
 
-  const port = parseInt(process.env.PORT, 10) || 4000;
+  const port = parseInt(process.env.PORT, 10) || 3306;
 
   // ── Graceful shutdown ─────────────────────────────────────────────────────
   app.enableShutdownHooks();
